@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analyser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="background-animation"></div>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header>
+            <h1>🎯 Skill Gap Analyser</h1>
+            <p class="subtitle">Elevate your career with AI-driven insights.</p>
+        </header>
+
+        <!-- AUTH SECTION -->
+        <section id="auth-section" class="active-section">
+            <div class="glass-card">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchAuth('login')">Login</button>
+                    <button class="tab-btn" onclick="switchAuth('signup')">Sign Up</button>
+                </div>
+
+                <form id="auth-form">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden">
+                    <button type="submit" id="auth-btn">Login</button>
+                </form>
+                <p id="auth-message"></p>
+            </div>
+        </section>
+
+        <!-- PROFILE SECTION -->
+        <section id="profile-section" class="hidden">
+            <div class="glass-card fade-in">
+                <h2>Setup Your Profile</h2>
+
+                <!-- 1. Full Name -->
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="full-name" placeholder="John Doe">
+                </div>
+
+                <!-- 2. Age -->
+                <div class="form-group">
+                    <label>Age *</label>
+                    <input type="number" id="age" min="18" max="60" placeholder="25">
+                </div>
+
+                <!-- 3. Technical Domain -->
+                <div class="form-group">
+                    <label>Select Technical Domain *</label>
+                    <div class="custom-select-wrapper">
+                        <select id="tech-domain" onchange="loadTechSkills()">
+                            <option value="">Select Domain</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 4. Target Job Role -->
+                <div class="form-group">
+                    <label>Target Job Role *</label>
+                    <select id="job-role">
+                        <option value="">Select Domain First</option>
+                    </select>
+                </div>
+
+                <!-- 4. Highest Qualification -->
+                <div class="form-group">
+                    <label>Highest Qualification *</label>
+                    <select id="qualification">
+                        <option value="">Select</option>
+                        <option value="Diploma">Diploma</option>
+                        <option value="UG">Undergraduate</option>
+                        <option value="PG">Postgraduate</option>
+                        <option value="PhD">PhD</option>
+                    </select>
+                </div>
+
+                <!-- Keeps Course as optional extra, or remove? I'll keep it for data completeness but move it down -->
+                <div class="form-group">
+                    <label>Course / Specialization *</label>
+                    <input type="text" id="course" placeholder="e.g. Computer Science">
+                </div>
+
+                <!-- Technical Skills Section -->
+                <div class="section-header">
+                    <h3>💻 Technical Skills (Mandatory)</h3>
+                </div>
+
+
+                <div class="form-group" id="tech-skills-group" style="display:none;">
+                    <label>Choose Technical Skills</label>
+                    <div class="multiselect-container" id="tech-multiselect">
+                        <div class="select-box" onclick="toggleSelect('tech')">
+                            <span id="tech-placeholder">Choose options</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="checkboxes" id="tech-checkboxes">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div id="tech-selected-tags" class="selected-tags-area"></div>
+                </div>
+
+                <!-- Soft Skills Section -->
+                <div class="section-header" style="margin-top: 20px;">
+                    <h3>🤝 Soft Skills (Mandatory)</h3>
+                </div>
+
+                <div class="form-group">
+                    <label>Choose Soft Skills</label>
+                    <div class="multiselect-container" id="soft-multiselect">
+                        <div class="select-box" onclick="toggleSelect('soft')">
+                            <span id="soft-placeholder">Choose options</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="checkboxes" id="soft-checkboxes">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div id="soft-selected-tags" class="selected-tags-area"></div>
+                </div>
+
+                <!-- Manual Add (Optional) -->
+                <div class="form-group"
+                    style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <label>Add Other Skills (Manual)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="skill-input" placeholder="e.g. Rare Skill" style="flex: 2;">
+                        <select id="skill-level" style="flex: 1;">
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Expert">Expert</option>
+                        </select>
+                        <button type="button" onclick="addSkill()"
+                            style="width: auto; margin-top: 0; padding: 0 15px;">+</button>
+                    </div>
+                    <div id="user-skills-list" class="tags-container" style="margin-top: 10px;"></div>
+                </div>
+
+                <button onclick="goToResume()">Next: Upload Resume ➔</button>
+            </div>
+        </section>
+
+        <!-- RESUME SECTION -->
+        <section id="resume-section" class="hidden">
+            <div class="glass-card">
+                <h2>📄 Upload Resume</h2>
+                <div class="upload-area" id="drop-zone">
+                    <p>Drag & Drop or Click to Upload (PDF/DOCX)</p>
+                    <input type="file" id="resume-file" hidden accept=".pdf,.docx">
+                </div>
+                <div id="file-name" class="hidden"></div>
+
+                <div id="ats-result" class="hidden" style="text-align: center;">
+                    <h3>ATS Score Overview</h3>
+                    <div style="position: relative; height: 200px; width: 200px; margin: 0 auto;">
+                        <canvas id="atsChart"></canvas>
+                        <div
+                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; color: var(--text-primary);">
+                            <span id="ats-score">0%</span>
+                        </div>
+                    </div>
+                    <p id="ats-feedback" style="margin-top: 15px; font-weight: 500;"></p>
+
+                    <h4>Detected Skills</h4>
+                    <div id="detected-skills" class="tags-container"></div>
+
+                    <button onclick="goToMakeAnalysis()">Proceed to Analysis ➔</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANALYSIS SECTION -->
+        <section id="analysis-section" class="hidden">
+            <div class="glass-card">
+                <h2>🔍 Job Analysis</h2>
+                <textarea id="jd-text" placeholder="Paste the Job Description here..." rows="8"></textarea>
+                <button onclick="analyzeGap()">Analyze Gap 🚀</button>
+            </div>
+        </section>
+
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboard-section" class="hidden">
+            <div class="glass-card">
+                <h2>📊 Skill Gap Dashboard</h2>
+
+                <div class="dashboard-grid">
+                    <div class="chart-card">
+                        <h3>Match Score</h3>
+                        <div class="score-display">
+                            <span id="match-percent">0%</span>
+                        </div>
+                        <p id="final-verdict"></p>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Breakdown</h3>
+                        <div
+                            style="position: relative; height: 250px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="gapChart"></canvas>
+                            <div
+                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: bold; color: var(--text-primary); pointer-events: none;">
+                                <span id="gap-percent-overlay">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Resume Strength</h3>
+                        <div
+                            style="position: relative; height: 250px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="dashboardAtsChart"></canvas>
+                            <div
+                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: bold; color: var(--text-primary); pointer-events: none;">
+                                <span id="dashboard-ats-percent-overlay">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card" style="grid-column: span 2;">
+                        <h3>Skill Category Performance</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3>💡 AI Recommendations</h3>
+                    <p>Based on your missing skills, here are some suggested actions:</p>
+                    <ul id="recommendation-list" style="margin-top: 10px; list-style-position: inside;"></ul>
+                </div>
+
+                <div class="skills-lists">
+                    <div class="skill-column success">
+                        <h3>✅ Matched Skills</h3>
+                        <ul id="matched-list"></ul>
+                    </div>
+                    <div class="skill-column danger">
+                        <h3>🔴 Missing Skills</h3>
+                        <ul id="missing-list"></ul>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button onclick="restart()">🔄 New Analysis</button>
+                </div>
+            </div>
+        </section>
+        <!-- NAVIGATION CONTROLS -->
+        <div id="nav-controls" class="nav-bar hidden">
+            <button id="prev-btn" onclick="goBack()" class="nav-btn secondary">
+                <span class="icon">←</span> Back
+            </button>
+            <button id="next-btn" onclick="goForward()" class="nav-btn">
+                Forward <span class="icon">→</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
